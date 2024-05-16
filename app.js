@@ -13,6 +13,7 @@ import authRouter from "./router/auth.js"
 import projectRouter from "./router/projects.js"
 import tenderRouter from "./router/tenders.js"
 import contractRouter from './router/contracts.js'
+import expenseRouter from './router/expenses.js'
 
 const app = express()
 
@@ -30,6 +31,7 @@ app.use('/auth', authRouter)
 app.use('/projects', projectRouter)
 app.use('/tenders', tenderRouter)
 app.use('/contracts', contractRouter)
+app.use('/expenses', expenseRouter)
 
 
 //uploaded files

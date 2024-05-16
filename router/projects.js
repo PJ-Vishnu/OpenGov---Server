@@ -8,7 +8,10 @@ router.use(express.json());
 
 router.post("/newProject", async (req, res) => {
   try {
-    const newProject = new Project(req.body);
+    // Set default value for status
+    const projectData = { ...req.body, status: "tendering" };
+    
+    const newProject = new Project(projectData);
     const savedProject = await newProject.save();
     return res.status(201).json({ result: savedProject, message: "Project Created" });
   } catch (error) {

@@ -1,24 +1,32 @@
 import mongoose from "mongoose";
-const expenses = new mongoose.Schema({
-    project_id:{
-        type:mongoose.Types.ObjectId
+
+const expenseSchema = new mongoose.Schema({
+    contractId: {
+      type: String,
+      required: true,
     },
-    contractorID:{
-        type:mongoose.Types.ObjectId
+    updatedResources: { // Replace "items" with a more descriptive name if needed
+      type: Array,
+      required: true
     },
-    expenseCategory:{
-        type:mongoose.Types.ObjectId
+    totalExpense:{
+      type:Number
     },
-    expenseAmount:{
-        type:mongoose.Types.ObjectId
+    progressReport: {
+      type: String,
+      required: true,
     },
-    date:{
-        type:Date
+    date: {
+      type: Date,
+      required: true,
     },
-    description:{
-        type:String
+    receiptFile: {
+      type: String,
+      default: null,  
     },
-    reciptDocuments:{
-        type:String
+    remainingProjectBudget :{
+      type:Number
     },
-})
+  });
+  
+export const Expense = mongoose.model('expenses', expenseSchema);
