@@ -78,6 +78,40 @@ router.get('/ourProjects/:id', async (req, res) => {
 });
 
 router.get('/viewProject/:id', async (req, res) => {
+    let { id } = req.params
+    try {
+        // Check if the provided ID is a contract ID
+        const contract = await Contract.findById(id);
+
+        if (!contract) {
+
+            // If not a contract ID, check if it's a project ID associated with a contract
+            const associatedContract = await Contract.findOne({ projectId: id });
+            const projectData = await Project.findById(id)
+            const projectDescription = projectData.projectDescription
+            if (!associatedContract) {
+                return res.status(404).json({ message: 'Invalid ID. Neither a contract nor a project associated with a contract found.' });
+            }
+
+            // If a project ID associated with a contract found, use the associated contract ID
+            id = associatedContract._id;
+            try {
+                const project = await Contract.findOne({ _id: id });
+                return res.status(200).json({ result: project, projectDescription });
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: "Internal server error" });
+            }
+        }
+    } catch (error) {
+        console.error('Error checking ID:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+
+
+});
+
+router.get('/viewProjectCompany/:id', async (req, res) => {
     const { id } = req.params
     try {
         const project = await Contract.findOne({ _id: id });
@@ -88,32 +122,56 @@ router.get('/viewProject/:id', async (req, res) => {
     }
 });
 
-router.get('/projectOrContract/:projectId', async (req, res) => {
-    const { projectId } = req.params;
 
+router.get('/allProjects', async (req, res) => {
     try {
-        // Check if the project exists and if it's currently tendering
-        const project = await Project.findOne({ _id: projectId, status: 'tendering' });
-        console.log(project);
-        if (project) {
-            // If the project is tendering, send project data to frontend
-            return res.status(200).json({ result: project });
-        } else {
-            // If the project is not tendering, check if there's a contract for it
-            const contract = await Contract.findOne({ projectId });
-
-            if (contract) {
-                // If a contract exists for the project, send contract data to frontend
-                return res.status(200).json({ result: contract });
-            } else {
-                // If neither project nor contract found, send appropriate message
-                return res.status(404).json({ message: "No project or contract found for the given ID" });
-            }
-        }
+        const allOurProjects = await Contract.find();
+        return res.status(200).json({ result: allOurProjects });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ message: "Internal server error" });
     }
 });
+
+router.put('/updateContractData/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const contract = await Contract.findById(id);
+
+        if (!contract) {
+            return res.status(404).json({ success: false, message: 'Contract not found' });
+        }
+
+        const tender = await Tender.findById(contract.tenderId);
+
+        if (!tender) {
+            return res.status(404).json({ success: false, message: 'Tender not found' });
+        }
+
+        // Update tender estimate
+        tender.tenderEstimate = req.body.tenderEstimate;
+        // Update estimate file if provided
+        if (req.file) {
+            tender.estimateFile = req.file.path;
+        }
+
+        const updatedTender = await tender.save();
+
+        // Update contract tender estimate
+        contract.tenderEstimate = req.body.tenderEstimate;
+        // Update estimate file if provided
+        if (req.file) {
+            contract.estimateFile = req.file.path;
+        }
+
+        await contract.save();
+
+        return res.status(200).json({ success: true, data: updatedTender, message: 'Tender estimate updated successfully' });
+    } catch (error) {
+        console.error('Error updating tender estimate:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
 
 export default router

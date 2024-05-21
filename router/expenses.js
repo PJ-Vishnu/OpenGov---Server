@@ -131,8 +131,38 @@ router.post('/addExpense', uploadReceipt.single('receiptFile'), async (req, res)
 
 
 router.get('/getExpenses/:id', async (req, res) => {
-  const { id } = req.params;
+  let { id } = req.params;
+
+  //check project ID or contract ID
+
+  try {
+    // Check if the provided ID is a contract ID
+    const contract = await Contract.findById(id);
+    
+    if (!contract) {
+      // If not a contract ID, check if it's a project ID associated with a contract
+      const associatedContract = await Contract.findOne({ projectId: id });
+      
+      if (!associatedContract) {
+        return res.status(404).json({ message: 'Invalid ID. Neither a contract nor a project associated with a contract found.' });
+      }
+      
+      // If a project ID associated with a contract found, use the associated contract ID
+      id = associatedContract._id;
+    }
+  } catch (error) {
+    console.error('Error checking ID:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+
+  //check end
+
   const expenses = await Expense.find({ contractId: id }).sort({ date: -1 });
+
+  if (expenses.length === 0) {
+    return res.status(404).json({ message: 'No expenses found for the specified contract ID.' });
+  }
+
   const latestExpense = expenses[0];
   
   let expensePerResource = {};
@@ -172,7 +202,7 @@ router.get('/getExpenses/:id', async (req, res) => {
 
   const remainingProjectBudget = latestExpense.remainingProjectBudget;
 
-  res.status(201).json({ expenseArray, remainingProjectBudget, resourceDetails });
+  res.status(201).json({ expenseArray, remainingProjectBudget, resourceDetails,expenses });
 });
 
 

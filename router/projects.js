@@ -1,5 +1,6 @@
 import express from "express";
 import { Project } from "../models/projects.js";
+import { Contract } from "../models/contracts.js";
 
 const router = express.Router();
 
@@ -89,6 +90,32 @@ router.get("/viewProject/:id", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
+router.get('/type/:projectId', async (req, res) => {
+  const { projectId } = req.params;
+
+  try {
+      // Check if the project exists and if it's currently tendering
+      const project = await Project.findOne({ _id: projectId });
+      
+      if (project) {
+          // If the project is tendering, send "tendering" as a response
+          if (project.status === 'tendering') {
+              return res.status(200).json({ type: 'tendering' });
+          } else if (project.status === 'contracted') {
+              // If the project is contracted, send "contracted" as a response
+              return res.status(200).json({ type: 'contracted' });
+          }
+      }
+
+      // If neither project nor contract found, send appropriate message
+      return res.status(404).json({ message: "No project or contract found for the given ID" });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 
 export default router;
