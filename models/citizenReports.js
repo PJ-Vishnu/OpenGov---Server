@@ -1,18 +1,23 @@
 import mongoose from 'mongoose'
-const citizenReport = new mongoose.Schema({
-    projectID:{
+const reportSchema = new mongoose.Schema({
+    citizenId:{
         type:mongoose.Types.ObjectId
     },
-    location:{
-        type:String
+    contractId:{
+        type:mongoose.Types.ObjectId
     },
     date:{
         type:String
     },
-    discription:{
+    type:{
         type:String
     },
-    Media:{
+    report:{
         type:String
-    }
+    },
+    files:[{
+        type:String
+    }]
 })
+const Reports = mongoose.model('reports', reportSchema)
+export { Reports };

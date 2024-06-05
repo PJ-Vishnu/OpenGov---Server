@@ -1,6 +1,7 @@
 import express from "express";
 import { Project } from "../models/projects.js";
 import { Contract } from "../models/contracts.js";
+import { ReqProject } from "../models/projectRequests.js";
 
 const router = express.Router();
 
@@ -116,6 +117,22 @@ router.get('/type/:projectId', async (req, res) => {
   }
 });
 
-
+router.get("/count", async (req, res) => {
+  try {
+      const totalProjectsCount = await Project.countDocuments();
+      const contractedProjectsCount = await Project.countDocuments({ status: "contracted" });
+      const tenderingProjectsCount = await Project.countDocuments({ status: "tendering" });
+      const requestedProjectsCount = await ReqProject.countDocuments();
+      return res.status(200).json({
+          totalProjects: totalProjectsCount,
+          contractedProjects: contractedProjectsCount,
+          tenderingProjects: tenderingProjectsCount,
+          requestedProjects: requestedProjectsCount
+      });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 export default router;
