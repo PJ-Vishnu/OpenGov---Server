@@ -4,6 +4,7 @@ import { Tender } from "../models/tender.js";
 import { Project } from "../models/projects.js";
 import { User } from "../models/user.js";
 
+
 const router = express.Router()
 
 router.post('/approveTender/:id', async (req, res) => {
@@ -121,6 +122,33 @@ router.get('/viewProjectCompany/:id', async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 });
+
+router.post('/expenserequest', async (req, res) => {
+    try {
+        // Extract data from the request body
+        const { contractId, requestLetter, newTenderEstimate, expenditure, file } = req.body;
+
+        // Create a new document for the expense request
+        const newExpenseRequest = new UpdateExpenseRequest({
+            contractId,
+            requestLetter,
+            newTenderEstimate,
+            expenditure,
+            file // Assuming the file contains the file path
+        });
+
+        // Save the expense request data into the database
+        await newExpenseRequest.save();
+
+        // Send a success response
+        return res.status(201).json({ success: true, message: 'Expense request stored successfully' });
+    } catch (error) {
+        // If an error occurs, send an error response
+        console.error('Error storing expense request:', error);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
 
 
 router.get('/allProjects', async (req, res) => {

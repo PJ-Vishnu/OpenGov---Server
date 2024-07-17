@@ -99,6 +99,7 @@ router.get("/updateuser/:id", async (req, res) => {
     }
 });
 
+
 router.delete('/deletetender/:tenderId', async (req, res) => {
     const { tenderId } = req.params;
     
@@ -114,7 +115,20 @@ router.delete('/deletetender/:tenderId', async (req, res) => {
     }
 });
 
-
+router.delete('/deleteUser/:id', async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+      const deletedUser = await User.findByIdAndDelete(id);
+      if (!deletedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      res.json({ message: "deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+});
 
 
 router.get("/getallcitizen",async (req, res)=>{
