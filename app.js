@@ -25,15 +25,7 @@ dotenv.config()
 
 // config json 
 app.use(express.json())
-
-const corsOptions = {
-    origin: 'https://opengov-q5nq.onrender.com', // Replace with your Vercel frontend URL
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type'],
-  };
-
-
-app.use(cors(corsOptions));
+app.use(cors())
 
 // route for user ,company registration api
 app.use('/register', userRegister)
