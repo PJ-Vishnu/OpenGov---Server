@@ -48,9 +48,17 @@ app.get('/test',(req,res)=>{
     res.json({message:'Server working!'})
 })
 
+mongoose.connect(process.env.MONGODB_URI).then(() => {
+    const PORT = process.env.PORT || 8000
+    app.listen(PORT, () => {
+        console.log(`App is Listening on PORT ${PORT}`);
+    })
+}).catch(err => {
+    console.log(err);
+});
 
 // server listing
-app.listen(process.env.PORT,()=>{
-    connectMongoDB()
-    console.log(`Server running on PORT : http://localhost:${process.env.PORT}`);
-})
+// app.listen(process.env.PORT,()=>{
+//     connectMongoDB()
+//     console.log(`Server running on PORT : http://localhost:${process.env.PORT}`);
+// })
